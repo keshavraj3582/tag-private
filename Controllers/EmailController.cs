@@ -4,9 +4,11 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using System;
 using System.Net;
+using Microsoft.AspNetCore.Http;
 //using Org.BouncyCastle.Asn1.Ocsp;
 using System.Data.SqlClient;
 using System.Data;
+using Microsoft.Extensions.Configuration;
 
 namespace School_Login_SignUp.Controllers
 {
@@ -15,20 +17,32 @@ namespace School_Login_SignUp.Controllers
     public class EmailController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private IHttpContextAccessor _httpContextAccessor;
 
-        public EmailController(IConfiguration configuration)
+        public EmailController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
             [HttpPost]
             [Route("otp")]
             public IActionResult SendOTP([FromBody] EmailRequest emailRequest)
             {
-                
-                string otp = GenerateRandomOTP();
-            
+                if (string.IsNullOrWhiteSpace(emailRequest.Email))
+                {
+                    return BadRequest("Recipient email address is required.");
+                }
 
-            
+                 string otp = GenerateRandomOTP();
+                var contextEmail = _httpContextAccessor.HttpContext.Session.GetString("UserEmail");
+                if (contextEmail != null)
+                {
+                    return BadRequest("An email is already in use in this context.");
+                }
+                _httpContextAccessor.HttpContext.Session.SetString("UserEmail", emailRequest.Email);
+
+
+
                 SaveOTPToDatabase(emailRequest.Email, otp);
 
             
@@ -48,13 +62,20 @@ namespace School_Login_SignUp.Controllers
             [Route("validateotp")]
             public IActionResult ValidateOTP([FromBody] OTPRequest otpRequest )
             {
-
-                bool isValidOtp = ValidateOTPFromDatabase(otpRequest.OTP);
-            
-
-                if (isValidOtp)
+                    string contextEmail = _httpContextAccessor.HttpContext.Session.GetString("UserEmail");
+                if (contextEmail == null)
                 {
-                    return Ok("Email validated.");
+                    return BadRequest("No email or OTP found in this context.");
+                }
+            bool isValidOtp = ValidateOTPFromDatabase(otpRequest.OTP);
+               
+
+              
+
+            if (isValidOtp)
+                {
+                _httpContextAccessor.HttpContext.Session.Remove("UserEmail");
+                return Ok("Email validated.");
                 }
                 else
                 {
@@ -88,11 +109,28 @@ namespace School_Login_SignUp.Controllers
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        return reader.HasRows; 
+                        return reader.HasRows;
                     }
                 }
             }
         }
+        //private bool ValidateOTPFromDatabase(string userOTP)
+        //{
+        //    using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+        //    {
+        //        connection.Open();
+
+        //        using (SqlCommand cmd = new SqlCommand("SELECT Email FROM OtpTable WHERE OTP = @OTP", connection))
+        //        {
+        //            cmd.Parameters.Add("@OTP", SqlDbType.NVarChar, 6).Value = userOTP;
+
+        //            using (SqlDataReader reader = cmd.ExecuteReader())
+        //            {
+        //                return reader.HasRows; 
+        //            }
+        //        }
+        //    }
+        //}
         private string GenerateRandomOTP()
         {
             // Generate a 6-digit random OTP
@@ -126,7 +164,7 @@ namespace School_Login_SignUp.Controllers
             }
             catch (Exception ex)
             {
-                // Handle email sending error
+                
                 return false;
             }
         }
@@ -136,7 +174,7 @@ namespace School_Login_SignUp.Controllers
 }
 public class EmailRequest
 {
-    public string Name { get; set; }
+   // public string Name { get; set; }
     public string Email { get; set; }
 }
 

@@ -10,7 +10,7 @@ namespace School_Login_SignUp.Controllers
     [ApiController]
     public class ValidationController : ControllerBase
     {
-       // private readonly string _connectionString; 
+       
         private readonly IConfiguration _configuration;
 
         public ValidationController(IConfiguration configuration)
