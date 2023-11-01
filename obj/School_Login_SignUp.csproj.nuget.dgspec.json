@@ -45,9 +45,17 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.2.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[7.0.11, )"
+            },
+            "MimeKit": {
+              "target": "Package",
+              "version": "[4.2.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -56,10 +64,6 @@
             "System.Data.SqlClient": {
               "target": "Package",
               "version": "[4.8.5, )"
-            },
-            "Twilio": {
-              "target": "Package",
-              "version": "[6.14.1, )"
             }
           },
           "imports": [

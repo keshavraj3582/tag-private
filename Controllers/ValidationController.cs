@@ -18,7 +18,8 @@ namespace School_Login_SignUp.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("validate")]
+        
+        [HttpPost("validate")]
         public IActionResult ValidateUser(string email, string password)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
@@ -36,13 +37,10 @@ namespace School_Login_SignUp.Controllers
                         if (reader.Read())
                         {
                             return Ok(new { message = "Login successful" });
-
-
-                           // return Ok("User is valid");
+                          // return Ok("User is valid");
                         }
                         else
-                        {
-                            
+                        {                            
                             return NotFound(new { message = "User not found or password is incorrect" });
                         }
                     }

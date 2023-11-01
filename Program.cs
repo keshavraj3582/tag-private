@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using School_Login_SignUp.Controllers;
-using Twilio;
 using WebApplication2.DataAccessLayer;
 
 var builder = WebApplication.CreateBuilder(args);
