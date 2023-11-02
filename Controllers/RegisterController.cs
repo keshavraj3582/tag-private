@@ -8,7 +8,7 @@ namespace WebApplication2.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+
     public class RegisterController : ControllerBase
     {
         public readonly Login _login;
@@ -22,7 +22,7 @@ namespace WebApplication2.Controllers
             List<SchoolData> schoolData = _login.Test();
             return Ok(schoolData);
         }
-        
+
 
     }
 }

@@ -11,7 +11,7 @@ namespace WebApplication2.DataAccessLayer
         private readonly string _connectionstring;
         public Login(string connectionstring)
         {
-           _connectionstring = connectionstring;
+            _connectionstring = connectionstring;
         }
         public List<SchoolData> Test()
         {
@@ -32,7 +32,7 @@ namespace WebApplication2.DataAccessLayer
                 }
             }
             return schoolDatas;
-            
+
 
 
         }

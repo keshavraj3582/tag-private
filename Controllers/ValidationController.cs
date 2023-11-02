@@ -10,7 +10,7 @@ namespace School_Login_SignUp.Controllers
     [ApiController]
     public class ValidationController : ControllerBase
     {
-       
+
         private readonly IConfiguration _configuration;
 
         public ValidationController(IConfiguration configuration)
@@ -18,7 +18,7 @@ namespace School_Login_SignUp.Controllers
             _configuration = configuration;
         }
 
-        
+
         [HttpPost("validate")]
         public IActionResult ValidateUser(string email, string password)
         {
@@ -37,10 +37,10 @@ namespace School_Login_SignUp.Controllers
                         if (reader.Read())
                         {
                             return Ok(new { message = "Login successful" });
-                          // return Ok("User is valid");
+                            // return Ok("User is valid");
                         }
                         else
-                        {                            
+                        {
                             return NotFound(new { message = "User not found or password is incorrect" });
                         }
                     }
