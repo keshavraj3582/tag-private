@@ -15,25 +15,24 @@ namespace School_Login_SignUp.Controllers
     {
 
         private readonly IConfiguration _configuration;
-        private IHttpContextAccessor _httpContextAccessor;
-        public SendotpforloginController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+       
+        public SendotpforloginController(IConfiguration configuration)
         {
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
+       
         }
         [HttpPost]
         public IActionResult SendOtp(string email)
         {
             if (IsValidEmail(email))
             {
-                // Generate a random 6-digit OTP
-                HttpContext.Session.SetString("UserEmail", email);
+               
                 string otp = GenerateRandomOTP();
 
-                // Send OTP via email
+                
                 if (SendOTPByEmail(email, otp))
                 {
-                    // Save email and OTP to the validation table
+                  
                     if (SaveEmailAndOTP(email, otp))
                     {
                         return Ok("OTP sent successfully.");
@@ -56,7 +55,7 @@ namespace School_Login_SignUp.Controllers
 
         private bool IsValidEmail(string email)
         {
-            // Validate email against the PermUserDataTable
+           
             string connectionString = "Server=DESKTOP-1K8UJFM\\SQLEXPRESS;Database=test;Trusted_Connection=true;TrustServerCertificate=true;";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -80,7 +79,7 @@ namespace School_Login_SignUp.Controllers
 
         private bool SaveEmailAndOTP(string email, string otp)
         {
-            // Save email and OTP to the validation table
+            
             string connectionString = "Server=DESKTOP-1K8UJFM\\SQLEXPRESS;Database=test;Trusted_Connection=true;TrustServerCertificate=true;";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -123,18 +122,14 @@ namespace School_Login_SignUp.Controllers
                 return false;
             }
         }
-        //another api endpoint generation
+       
         [HttpPost]
         [Route("validateotpforlogin")]
         public IActionResult ValidateOtp([FromBody] validateotprequest validaterequest)
         {
-            string contextEmail = HttpContext.Session.GetString("UserEmail");
-            if (contextEmail == null)
-            {
-                return BadRequest("No email or OTP found in this context.");
-            }
+            
 
-            if (IsValidOtp(contextEmail, validaterequest.enteredotp))
+            if (IsValidOtp(validaterequest.emailforlogin, validaterequest.enteredotp))
             {
                 return Ok("OTP is valid.");
             }
@@ -171,6 +166,8 @@ namespace School_Login_SignUp.Controllers
     public class validateotprequest
     {
         public string enteredotp { get; set; }
+        public string emailforlogin { get; set; }
+
     }
 }//namespace
 

@@ -16,11 +16,11 @@ namespace School_Login_SignUp.Controllers
     public class EmailController : ControllerBase
     { 
         private readonly IConfiguration _configuration;
-        private IHttpContextAccessor _httpContextAccessor;
+      
         public EmailController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
+        
         }
         [HttpPost]
         [Route("otp")]
@@ -31,12 +31,7 @@ namespace School_Login_SignUp.Controllers
                 return BadRequest("Recipient email address is required.");
             }
             string otp = GenerateRandomOTP();
-            var contextEmail = _httpContextAccessor.HttpContext.Session.GetString("UserEmail");
-            if (contextEmail != null)
-            {
-                return BadRequest("An email is already in use in this context.");
-            }
-            _httpContextAccessor.HttpContext.Session.SetString("UserEmail", emailRequest.Email);
+         
             SaveOTPToDatabase(emailRequest.RegName, emailRequest.RegPhone, emailRequest.RegDest, emailRequest.Email, otp);
             bool isEmailSent = SendOTPByEmail(emailRequest.Email, otp);
             if (isEmailSent)
@@ -54,17 +49,13 @@ namespace School_Login_SignUp.Controllers
         [Route("validateotp")]
         public IActionResult ValidateOTP([FromBody] OTPRequest otpRequest)
         {
-            string contextEmail = _httpContextAccessor.HttpContext.Session.GetString("UserEmail");
-            if (contextEmail == null)
-            {
-                return BadRequest("No email or OTP found in this context.");
-            }
-            bool isValidOtp = ValidateOTPFromDatabase(otpRequest.OTP);
+           
+            bool isValidOtp = ValidateOTPFromDatabase(otpRequest.OTP,otpRequest.emailforval);
             if (isValidOtp)
             {
                 CopyDataBetweenTables();
                 DeleteOldRecordsFromOtpTable();
-                _httpContextAccessor.HttpContext.Session.Remove("UserEmail");
+                
                 return Ok("Email validated.");
             }
             else
@@ -72,7 +63,7 @@ namespace School_Login_SignUp.Controllers
                 return BadRequest("Email not validated.");
             }
         }
-        //static string connectionString = "Server=DESKTOP-1K8UJFM\\SQLEXPRESS;Database=test;Trusted_Connection=true;TrustServerCertificate=true;"; 
+        
         private void CopyDataBetweenTables()
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
@@ -116,15 +107,16 @@ namespace School_Login_SignUp.Controllers
                 }
             }
         }
-        private bool ValidateOTPFromDatabase(string userOTP)
+        private bool ValidateOTPFromDatabase(string userOTP,string userEMAIL)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();
 
-                using (SqlCommand cmd = new SqlCommand("SELECT Email FROM OtpTable WHERE OTP = @OTP", connection))
+                using (SqlCommand cmd = new SqlCommand("SELECT Email FROM OtpTable WHERE Email = @Email AND OTP = @OTP", connection))
                 {
                     cmd.Parameters.Add("@OTP", SqlDbType.NVarChar, 6).Value = userOTP;
+                    cmd.Parameters.Add("@Email", SqlDbType.NVarChar, 255).Value = userEMAIL;
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -181,6 +173,7 @@ namespace School_Login_SignUp.Controllers
     public class OTPRequest
     {
         public string OTP { get; set; }
+        public string emailforval { get; set; }
     }//Otp Request Model
 }//namespace
 
