@@ -7,7 +7,6 @@ namespace School_Login_SignUp.DatabaseServices
     public class DatabaseOperations : IDatabaseService
     {
         private readonly IConfiguration _configuration;
-
         public DatabaseOperations(IConfiguration configuration)
         {
             _configuration = configuration;

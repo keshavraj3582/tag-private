@@ -50,9 +50,9 @@ namespace School_Login_SignUp.Controllers
             }
             else
             {
-                return BadRequest("Invalid Email");
+                return BadRequest("Account Doesn't Exists Please Sign Up");
             }
         }
     }
-}//namespace
+}
 

@@ -22,7 +22,7 @@ namespace School_Login_SignUp.Controllers
         private readonly OtpService _otpService;
         
 
-        public SendOtpForRegistrationController(IConfiguration configuration, EmailService emailService, OtpService otpService,IDatabaseService databaseService)
+        public SendOtpForRegistrationController(IConfiguration configuration, IDatabaseService databaseService, EmailService emailService, OtpService otpService)
         {
             _databaseServices = databaseService;
             _configuration = configuration;
@@ -70,7 +70,7 @@ namespace School_Login_SignUp.Controllers
         }
     }
    
-}//namespace
+}
 
 
 

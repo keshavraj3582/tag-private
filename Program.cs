@@ -5,16 +5,10 @@ using Microsoft.AspNetCore.Http;
 using School_Login_SignUp.DatabaseServices;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
-
-
 builder.Services.AddControllers();
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache(); 
 builder.Services.AddSession();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<EmailService>();

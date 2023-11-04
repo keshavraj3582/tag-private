@@ -10,7 +10,7 @@ namespace School_Login_SignUp.Services
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Tech-Avant-Garde", "saheranadaf11@gmail.com"));
+                message.From.Add(new MailboxAddress("Tech-Avant-Garde", "keshavraj123.kr@gmail.com"));
                 message.To.Add(new MailboxAddress("", email));
                 message.Subject = "Registration Code";
                 message.Body = new TextPart("plain")
