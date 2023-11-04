@@ -5,6 +5,8 @@ using School_Login_SignUp.Models;
 using System.Data.SqlClient;
 using System.Data;
 using School_Login_SignUp.Services;
+using System.Runtime.InteropServices;
+using School_Login_SignUp.DatabaseServices;
 
 namespace School_Login_SignUp.Controllers
 {
@@ -13,23 +15,23 @@ namespace School_Login_SignUp.Controllers
     public class ValidateOtpForRegistrationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        
-        public ValidateOtpForRegistrationController(IConfiguration configuration)
+        private readonly IDatabaseService _databaseService;
+
+        public ValidateOtpForRegistrationController(IConfiguration configuration,IDatabaseService databaseService)
         {
             _configuration = configuration;
-          
-
+            _databaseService = databaseService;
         }
         [HttpPost]
         public async Task<IActionResult> ValidateOTP([FromBody] OTPRequest otpRequest)
         {
             try
             {
-                bool isValidOtp = await ValidateOTPFromDatabaseAsync(otpRequest.OTP, otpRequest.emailforval);
+                bool isValidOtp = await _databaseService.ValidateOTPFromDatabaseAsync(otpRequest.OTP, otpRequest.emailforval);
                 if (isValidOtp)
                 {
-                    await CopyDataBetweenTables();
-                    await DeleteOldRecordsFromOtpTable();
+                    await _databaseService.CopyDataBetweenTables();
+                    await _databaseService.DeleteOldRecordsFromOtpTableAsync();
 
                     return Ok("Email validated.");
                 }
@@ -44,49 +46,24 @@ namespace School_Login_SignUp.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        private async Task<bool> ValidateOTPFromDatabaseAsync(string userOTP, string userEMAIL)
+        private async Task DeleteValidatedRecordFromOtpTableAsync(string email, string otp)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 await connection.OpenAsync();
 
-                using (SqlCommand cmd = new SqlCommand("SELECT Email FROM OtpTable WHERE Email = @Email AND OTP = @OTP", connection))
+                using (SqlCommand cmd = new SqlCommand("DeleteValidatedRecordFromOtpTable", connection))
                 {
-                    cmd.Parameters.Add("@OTP", SqlDbType.NVarChar, 6).Value = userOTP;
-                    cmd.Parameters.Add("@Email", SqlDbType.NVarChar, 255).Value = userEMAIL;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@OTP", otp);
 
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        return await reader.ReadAsync();
-                    }
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }
 
-        private async Task CopyDataBetweenTables()
-        {
-            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                await connection.OpenAsync();
 
-                using (SqlCommand command = new SqlCommand("CopyDataFromOtpToPermUser", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
-        }
-        private async Task DeleteOldRecordsFromOtpTable()
-        {
-            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                await connection.OpenAsync();
 
-                using (SqlCommand command = new SqlCommand("DELETE FROM OtpTable WHERE DATEDIFF(MINUTE, Timestamp, GETDATE()) > 5", connection))
-                {
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
-        }
     }
 }

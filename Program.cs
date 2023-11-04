@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using School_Login_SignUp.Controllers;
 using School_Login_SignUp.Services;
 using Microsoft.AspNetCore.Http;
-
+using School_Login_SignUp.DatabaseServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<OtpService>();
+builder.Services.AddScoped<IDatabaseService, DatabaseOperations>();
 //builder.Services.AddTransient<Login>(_ => new Login(builder.Configuration.GetConnectionString("DefaultConnection")));
 //builder.Services.AddTransient<ValidationController>(_ => new ValidationController(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddCors(options =>
@@ -32,11 +33,9 @@ builder.Services.AddCors(options =>
         });
 });
 
-
 var app = builder.Build();
 app.UseSession();
 app.UseCors();
-
 
 if (app.Environment.IsDevelopment())
 {

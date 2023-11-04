@@ -20,7 +20,8 @@ namespace School_Login_SignUp.Services
                 using (var client = new SmtpClient())
                 {
                     await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync("saheranadaf11@gmail.com", "fjkkdiqzcjjulfal");
+                    //await client.AuthenticateAsync("saheranadaf11@gmail.com", "fjkkdiqzcjjulfal");
+                    await client.AuthenticateAsync("keshavraj123.kr@gmail.com", "aiiu xebi pgvy vyiw");
                     await client.SendAsync(message);
                     await client.DisconnectAsync(true);
                 }
