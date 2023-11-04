@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Data.SqlClient;
 using System.Data;
-using Microsoft.Extensions.Configuration;
-using MailKit.Security;
-using System.Net.Mail;
-using Org.BouncyCastle.Asn1.Ocsp;
+using MailKit.Net.Smtp;
+using MimeKit;
+using School_Login_SignUp.Models;
+
+
 
 namespace School_Login_SignUp.Controllers
 {
@@ -17,14 +18,14 @@ namespace School_Login_SignUp.Controllers
     { 
         private readonly IConfiguration _configuration;
       
-        public EmailController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public EmailController(IConfiguration configuration)
         {
             _configuration = configuration;
         
         }
         [HttpPost]
         [Route("otp")]
-        public IActionResult SendOTP([FromBody] EmailRequest emailRequest)
+        public async Task<IActionResult> SendOTP([FromBody] EmailRequest emailRequest)
         {
             if (string.IsNullOrWhiteSpace(emailRequest.Email))
             {
@@ -32,9 +33,13 @@ namespace School_Login_SignUp.Controllers
             }
             string otp = GenerateRandomOTP();
          
-            SaveOTPToDatabase(emailRequest.RegName, emailRequest.RegPhone, emailRequest.RegDest, emailRequest.Email, otp);
-            bool isEmailSent = SendOTPByEmail(emailRequest.Email, otp);
-            if (isEmailSent)
+            await SaveOTPToDatabaseAsync(emailRequest.RegName, emailRequest.RegPhone, emailRequest.RegDest, emailRequest.Email, otp);
+           
+            Task<bool> isEmailSent = SendOtpByEmailAsync(emailRequest.Email, otp);
+            
+            await isEmailSent;
+
+            if (isEmailSent.Result)
             {
                 return Ok("OTP sent successfully.");
             }
@@ -47,53 +52,63 @@ namespace School_Login_SignUp.Controllers
 
         [HttpPost]
         [Route("validateotp")]
-        public IActionResult ValidateOTP([FromBody] OTPRequest otpRequest)
+        public async Task<IActionResult> ValidateOTP([FromBody] OTPRequest otpRequest)
         {
-           
-            bool isValidOtp = ValidateOTPFromDatabase(otpRequest.OTP,otpRequest.emailforval);
-            if (isValidOtp)
+            try
             {
-                CopyDataBetweenTables();
-                DeleteOldRecordsFromOtpTable();
+                bool isValidOtp = await ValidateOTPFromDatabaseAsync(otpRequest.OTP, otpRequest.emailforval);
+                if (isValidOtp)
+                {
+                    await CopyDataBetweenTables();
+                    await DeleteOldRecordsFromOtpTable();
+
+                    return Ok("Email validated.");
+                }
+                else
+                {
+                    return BadRequest("Email not validated.");
+                }
+            }
+            catch (Exception ex)
+            {
                 
-                return Ok("Email validated.");
+                return StatusCode(500, "Internal Server Error");
             }
-            else
-            {
-                return BadRequest("Email not validated.");
-            }
+
+
+
         }
-        
-        private void CopyDataBetweenTables()
+
+        private async Task  CopyDataBetweenTables()
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 using (SqlCommand command = new SqlCommand("CopyDataFromOtpToPermUser", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
         }
-        private void DeleteOldRecordsFromOtpTable()
+        private async Task DeleteOldRecordsFromOtpTable()
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
-                using (SqlCommand command = new SqlCommand("DELETE FROM OtpTable WHERE DATEDIFF(MINUTE, Timestamp, GETDATE()) > 30", connection))
+                using (SqlCommand command = new SqlCommand("DELETE FROM OtpTable WHERE DATEDIFF(MINUTE, Timestamp, GETDATE()) > 5", connection))
                 {
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
             }
         }
-        private void SaveOTPToDatabase(string RegName, string RegPhone, string RegDest, string email, string otp)
+        private async Task SaveOTPToDatabaseAsync(string RegName, string RegPhone, string RegDest, string email, string otp)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 using (SqlCommand cmd = new SqlCommand("INSERT INTO OtpTable (RegName,RegPhone,RegDest,Email, OTP, Timestamp) VALUES (@RegName,@RegPhone,@RegDest,@Email, @OTP, GETDATE())", connection))
                 {
@@ -103,24 +118,24 @@ namespace School_Login_SignUp.Controllers
                     cmd.Parameters.Add("@RegPhone", SqlDbType.NVarChar, 15).Value = RegPhone;
                     cmd.Parameters.Add("@RegName", SqlDbType.NVarChar, 50).Value = RegName;
 
-                    cmd.ExecuteNonQuery();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }
-        private bool ValidateOTPFromDatabase(string userOTP,string userEMAIL)
+        private async Task<bool> ValidateOTPFromDatabaseAsync(string userOTP,string userEMAIL)
         {
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 using (SqlCommand cmd = new SqlCommand("SELECT Email FROM OtpTable WHERE Email = @Email AND OTP = @OTP", connection))
                 {
                     cmd.Parameters.Add("@OTP", SqlDbType.NVarChar, 6).Value = userOTP;
                     cmd.Parameters.Add("@Email", SqlDbType.NVarChar, 255).Value = userEMAIL;
 
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (SqlDataReader reader =await cmd.ExecuteReaderAsync())
                     {
-                        return reader.HasRows;
+                        return await reader.ReadAsync();
                     }
                 }
             }
@@ -133,48 +148,37 @@ namespace School_Login_SignUp.Controllers
             int otp = random.Next(100000, 999999);
             return otp.ToString();
         }
-
-        private bool SendOTPByEmail(string email, string otp)
+        private async Task<bool> SendOtpByEmailAsync(string email, string otp)
         {
-            string from = "saheranadaf11@gmail.com";
-            string pass = "fjkkdiqzcjjulfal";
-            MailMessage message = new MailMessage();
-            message.To.Add(email);
-            message.From = new MailAddress(from);
-            message.Body = "Your otp code is " + otp;
-            message.Subject = "Registration Code";
-
-
-            SmtpClient smtp = new SmtpClient("smtp.gmail.com");
-
-            smtp.EnableSsl = true;
-            smtp.Port = 587;
-            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-            smtp.Credentials = new NetworkCredential(from, pass);
             try
             {
-                smtp.Send(message);
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Tech-Avant-Garde", "saheranadaf11@gmail.com"));
+                message.To.Add(new MailboxAddress("", email));
+                message.Subject = "Registration Code";
+                message.Body = new TextPart("plain")
+                {
+                    Text = "Your otp code is " + otp
+                };
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync("saheranadaf11@gmail.com", "fjkkdiqzcjjulfal");
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
+
                 return true;
             }
             catch (Exception ex)
             {
+
                 return false;
             }
-        }//Send Otp by email
+        }   
     }
-    public class EmailRequest
-    { 
-        public string RegName { get; set; }
-        public string RegPhone { get; set; }
-        public string RegDest { get; set; }
-        public string Email { get; set; }
-    }//Email Request Model
-
-    public class OTPRequest
-    {
-        public string OTP { get; set; }
-        public string emailforval { get; set; }
-    }//Otp Request Model
+   
 }//namespace
 
 
