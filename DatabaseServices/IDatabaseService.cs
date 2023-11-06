@@ -3,7 +3,7 @@
     public interface IDatabaseService
     {
         Task<bool> IsValidOtpAsync(string email, string enteredOtp);
-        Task  CopyDataBetweenTables();
+        Task<bool>  CopyDataBetweenTables();
         Task SaveOTPToDatabaseAsync(string RegName, string RegPhone, string RegDest, string email, string otp);
 
         Task<bool> IsEmailExistsInPermUserTableAsync(string email);

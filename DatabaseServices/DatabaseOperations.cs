@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq.Expressions;
 
 namespace School_Login_SignUp.DatabaseServices
 {
@@ -11,19 +12,28 @@ namespace School_Login_SignUp.DatabaseServices
         {
             _configuration = configuration;
         }
-        async Task IDatabaseService.CopyDataBetweenTables()
+        async Task<bool> IDatabaseService.CopyDataBetweenTables()
         {
-            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            try
             {
-                await connection.OpenAsync();
-
-                using (SqlCommand command = new SqlCommand("CopyDataFromOtpToPermUser", connection))
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    await command.ExecuteNonQueryAsync();
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("CopyDataFromOtpToPermUser", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    return true;
                 }
             }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
+        
 
         async Task<bool> IDatabaseService.IsValidOtpAsync(string email, string enteredOtp)
         {

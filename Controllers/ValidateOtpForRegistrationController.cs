@@ -19,20 +19,20 @@ namespace School_Login_SignUp.Controllers
         private readonly IConfiguration _configuration;
 
         public ValidateOtpForRegistrationController(IConfiguration configuration,IDatabaseService databaseService)
-        {
-            
+        {            
             _databaseService = databaseService;
             _configuration = configuration;
         }
         [HttpPost]
         public async Task<IActionResult> ValidateOTP([FromBody] OTPRequest otpRequest)
         {
+            bool copySucces;
             try
             {
                 bool isValidOtp = await _databaseService.ValidateOTPFromDatabaseAsync(otpRequest.OTP, otpRequest.emailforval);
                 if (isValidOtp)
                 {
-                    await _databaseService.CopyDataBetweenTables();
+                    copySucces=await _databaseService.CopyDataBetweenTables();
                     // await _databaseService.DeleteOldRecordsFromOtpTableAsync();
                     //DeleteValidatedRecordFromOtpTableAsync(otpRequest.OTP,otpRequest.emailforval)
 
@@ -42,6 +42,15 @@ namespace School_Login_SignUp.Controllers
                 {
                     return BadRequest("Email not validated.");
                 }
+                if (copySucces)
+                {
+                    await DeleteValidatedRecordFromOtpTableAsync(otpRequest.OTP, otpRequest.emailforval);
+
+                }
+                else
+                {
+                    await _databaseService.DeleteOldRecordsFromOtpTableAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -49,22 +58,22 @@ namespace School_Login_SignUp.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        //private async Task DeleteValidatedRecordFromOtpTableAsync(string email, string otp)
-        //{
-        //    using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
-        //    {
-        //        await connection.OpenAsync();
+        private async Task DeleteValidatedRecordFromOtpTableAsync(string email, string otp)
+        {
+            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                await connection.OpenAsync();
 
-        //        using (SqlCommand cmd = new SqlCommand("DeleteValidatedRecordFromOtpTable", connection))
-        //        {
-        //            cmd.CommandType = CommandType.StoredProcedure;
-        //            cmd.Parameters.AddWithValue("@Email", email);
-        //            cmd.Parameters.AddWithValue("@OTP", otp);
+                using (SqlCommand cmd = new SqlCommand("DeleteValidatedRecordFromOtpTable", connection))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@OTP", otp);
 
-        //            await cmd.ExecuteNonQueryAsync();
-        //        }
-        //    }
-        //}
+                    await cmd.ExecuteNonQueryAsync();
+                }
+            }
+        }
 
 
 
