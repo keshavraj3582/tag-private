@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using School_Login_SignUp.DatabaseServices;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<GlobalStringService>();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache(); 

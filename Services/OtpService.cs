@@ -1,5 +1,6 @@
 ﻿namespace School_Login_SignUp.Services
 {
+   
     public class OtpService
     {
         public string GenerateRandomOTP()

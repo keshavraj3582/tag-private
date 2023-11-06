@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using School_Login_SignUp.DatabaseServices;
 using School_Login_SignUp.Models;
+using School_Login_SignUp.Services;
 using System.Data.SqlClient;
 
 namespace School_Login_SignUp.Controllers
 {
+    
     [Route("Api/[controller]")]
     [ApiController]
+    
     public class ValidateOtpForLoginController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly GlobalStringService _globalStringService;
+
         private readonly IDatabaseService _databaseService;
-        public ValidateOtpForLoginController(IConfiguration configuration, IDatabaseService databaseService)
+        public ValidateOtpForLoginController(IDatabaseService databaseService, GlobalStringService globalStringService)
         {
-            _configuration = configuration;
+            
             _databaseService = databaseService;
+            _globalStringService = globalStringService;
         }
         [HttpPost]
         public async Task<IActionResult> ValidateOtp([FromBody] ValidateOtpRequest validaterequest)
@@ -26,6 +31,9 @@ namespace School_Login_SignUp.Controllers
                 bool isValidOtp = await _databaseService.IsValidOtpAsync(validaterequest.emailforlogin, validaterequest.enteredotp);
                 if (isValidOtp)
                 {
+                    HttpContext.Items["UserEmail"] = validaterequest.emailforlogin;
+                    string globalValue = _globalStringService.GlobalString;
+                    _globalStringService.GlobalString = validaterequest.emailforlogin;
                     return Ok("OTP is valid.");
                 }
                 else
