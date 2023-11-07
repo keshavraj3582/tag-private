@@ -3,9 +3,12 @@ using School_Login_SignUp.Controllers;
 using School_Login_SignUp.Services;
 using Microsoft.AspNetCore.Http;
 using School_Login_SignUp.DatabaseServices;
+using School_Login_SignUp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<GlobalStringService>();
+builder.Services.AddScoped<InstitutionDataAccess>();
+builder.Services.AddScoped<RazorpayService>();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache(); 

@@ -16,12 +16,14 @@ namespace School_Login_SignUp.Controllers
         private readonly IConfiguration _configuration;
         private readonly GlobalStringService _globalStringService;
         private readonly EmailService _emailService;
+        private readonly RazorpayService _razorpayService;
 
-        public ModulesController(IConfiguration configuration, GlobalStringService globalStringService,EmailService emailService)
+        public ModulesController(IConfiguration configuration, GlobalStringService globalStringService,EmailService emailService, RazorpayService razorpayService)
         {
             _configuration = configuration;
             _globalStringService = globalStringService;
             _emailService = emailService;
+            _razorpayService = razorpayService;
         }
        
         [HttpGet]
@@ -161,6 +163,20 @@ namespace School_Login_SignUp.Controllers
             }
 
             return instituteDataList;
+        }
+        //-------------------------------------------------------------------------------------
+        [HttpPost("create-order")]
+        public ActionResult<string> CreateOrder(CreateOrderRequest request)
+        {
+            var orderId = _razorpayService.CreateOrder(request.Amount, request.Currency, request.Notes);
+            return Ok(orderId);
+        }
+
+        [HttpPost("payment")]
+        public ActionResult<string> Payment(RegistrationModel registration)
+        {
+            var razorPayOptions = _razorpayService.Payment(registration);
+            return Ok(razorPayOptions);
         }
 
 
