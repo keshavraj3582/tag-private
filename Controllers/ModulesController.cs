@@ -29,20 +29,19 @@ namespace School_Login_SignUp.Controllers
         {
             try
             {
-                // Retrieve the selected modules' amount for the given school using a stored procedure
+                
                 string otp = null;
                 decimal selectedModulesAmount = RetrieveSelectedModulesAmount(schoolCode);
                 string globalValue = _globalStringService.GlobalString;
                 string userEmail = _globalStringService.GlobalString;
                 string username = GenerateRandomUsername(schoolCode);
                 string password = GenerateRandomPassword();
-                var instituteDataList = GetAllVerifiedInstituteDataFromDatabase();
                 string messageBody = $"Your selected modules' total amount is: {selectedModulesAmount:C} & user id {username} password is {password} kindly pay through this link dummy link" ;
                 await _emailService.SendOtpByEmailAsync(userEmail, otp, messageBody);
-                if (selectedModulesAmount >= 0 && instituteDataList != null && instituteDataList.Any())
+                if (selectedModulesAmount >= 0 )
                 {
-                    return Ok(new { SelectedModulesAmount = selectedModulesAmount, VerifiedInstituteData = instituteDataList });
-                }
+                    return Ok( selectedModulesAmount );
+                } 
                 else if (selectedModulesAmount >= 0)
                 {
                     return NotFound("No data found for schools with verification status = 1.");
@@ -51,18 +50,6 @@ namespace School_Login_SignUp.Controllers
                 {
                     return BadRequest("Failed to retrieve selected modules' amount.");
                 }
-
-                //if (selectedModulesAmount >= 0)
-                //{
-                //    // Send the amount via email
-                //    //string messageBody = $"Your selected modules' total amount is: {selectedModulesAmount:C}";
-                //  //  bool emailSent = await _emailService.SendOtpByEmailAsync(email, messageBody);
-
-                //    if (true)
-                //    {
-                //        //return Ok($"Selected modules' amount sent to {email} successfully.");
-                //        return Ok($"selected module Total will be {selectedModulesAmount}");
-                //    }
     
             }
             catch (Exception ex)
@@ -70,16 +57,40 @@ namespace School_Login_SignUp.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet]
+        [Route("GetVerifiedList")]
+        public async Task<IActionResult> GetVerifiedInstituteList()
+        {
+            try
+            {
+                var instituteDataList = GetAllVerifiedInstituteDataFromDatabase();
+                if (instituteDataList != null && instituteDataList.Any())
+                {
+                    return Ok(instituteDataList );
+                }
+                else
+                {
+                    return BadRequest("Data not Found");
+                }
+
+            }
+            catch(Exception ex) 
+            {
+                return BadRequest($"Unable to find {ex.Message}");
+
+            }
+
+        }
         private string GenerateRandomUsername(string schoolCode)
         {
-            // Generate a random username (e.g., based on the schoolCode)
+            
             string username = "User_" + schoolCode + "_" + Guid.NewGuid().ToString("N").Substring(0, 6);
             return username;
         }
 
         private string GenerateRandomPassword()
         {
-            // Generate a random password (e.g., using a random string)
+            
             string password = Guid.NewGuid().ToString("N").Substring(0, 8);
             return password;
         }
@@ -88,8 +99,7 @@ namespace School_Login_SignUp.Controllers
 
         private decimal RetrieveSelectedModulesAmount(string schoolCode)
         {
-            // You can implement the code to call the stored procedure and retrieve the amount here
-            // Replace the code below with your database access logic
+            
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();
@@ -105,7 +115,7 @@ namespace School_Login_SignUp.Controllers
                         {
                             return reader.GetDecimal(0);
                         }
-                        return -1; // Return a negative value to indicate an error
+                        return -1; 
                     }
                 }
             }
