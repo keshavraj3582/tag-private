@@ -31,7 +31,7 @@ namespace School_Login_SignUp.Controllers
                 bool isValidOtp = await _databaseService.IsValidOtpAsync(validaterequest.emailforlogin, validaterequest.enteredotp);
                 if (isValidOtp)
                 {
-                    HttpContext.Items["UserEmail"] = validaterequest.emailforlogin;
+                    //HttpContext.Items["UserEmail"] = validaterequest.emailforlogin;
                     string globalValue = _globalStringService.GlobalString;
                     _globalStringService.GlobalString = validaterequest.emailforlogin;
                     return Ok("OTP is valid.");
