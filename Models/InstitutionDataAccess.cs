@@ -73,10 +73,9 @@ namespace School_Login_SignUp.Models
             {
                 await connection.OpenAsync();
 
-                using (SqlCommand command = new SqlCommand("sp_AddInstitution", connection))
+                using (SqlCommand command = new SqlCommand("sp_AddInstitution2", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-
                     command.Parameters.AddWithValue("@InstitutionName", institution.InstitutionName);
                     command.Parameters.AddWithValue("@Address", institution.Address);
                     command.Parameters.AddWithValue("@Country", institution.Country);
@@ -91,8 +90,9 @@ namespace School_Login_SignUp.Models
                     command.Parameters.AddWithValue("@SelectedFacility", institution.SelectedFacility);
                     command.Parameters.AddWithValue("@SchoolCode", institution.SchoolCode);
                     command.Parameters.AddWithValue("@VerificationStatus", institution.VerificationStatus);
-
+                    command.Parameters.AddWithValue("@status_o", "Registered");
                     int rowsAffected = await command.ExecuteNonQueryAsync();
+
                     return rowsAffected;
                 }
             }

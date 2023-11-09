@@ -129,6 +129,11 @@ namespace School_Login_SignUp.Controllers
             using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 connection.Open();
+                using (SqlCommand updateStatusCommand = new SqlCommand("UPDATE Institutions SET status_o = 'approvedtest'", connection))
+                {
+                    
+                    updateStatusCommand.ExecuteNonQuery();
+                }
 
                 using (SqlCommand command = new SqlCommand("GetVerifiedInstituteDataForAll", connection))
                 {
@@ -153,7 +158,8 @@ namespace School_Login_SignUp.Controllers
                                 AvailableFacility = reader["AvailableFacility"].ToString(),
                                 SelectedFacility = reader["SelectedFacility"].ToString(),
                                 SchoolCode = reader["SchoolCode"].ToString(),
-                                VerificationStatus = Convert.ToBoolean(reader["VerificationStatus"])
+                                VerificationStatus = Convert.ToBoolean(reader["VerificationStatus"]
+                                )
                             };
 
                             instituteDataList.Add(institute);
@@ -177,6 +183,33 @@ namespace School_Login_SignUp.Controllers
         {
             var razorPayOptions = _razorpayService.Payment(registration);
             return Ok(razorPayOptions);
+        }
+        [HttpGet("status")]
+        public IActionResult GetStatus_O()
+        {
+            using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                try
+                {
+                    connection.Open();
+                    {
+                        using var command = new SqlCommand("SELECT status_o FROM Institutions", connection);
+                        var status_o = command.ExecuteScalar();
+                        return Ok(status_o);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            
+            
+            
         }
 
 
