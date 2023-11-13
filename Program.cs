@@ -17,6 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<OtpService>();
+builder.Services.AddScoped<SuperAdminDataAccess>();
 builder.Services.AddScoped<IDatabaseService, DatabaseOperations>();
 //builder.Services.AddTransient<Login>(_ => new Login(builder.Configuration.GetConnectionString("DefaultConnection")));
 //builder.Services.AddTransient<ValidationController>(_ => new ValidationController(builder.Configuration.GetConnectionString("DefaultConnection")));

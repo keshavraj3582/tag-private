@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "iYccNksXBc6w2v/5kGm2eRdVjFn4LNqdFGPH8P8oxUn2qSfEJmb/Zxuqjcl83+s/RyOYfKrkZSl3F4msjScC7w==",
+  "dgSpecHash": "Mw8yojsU+b9jEVTLw0VvSwtqs+qqm7io1B2DGMiolOHbtG4uOXhKQfQJ00Ay3KDq8/QiXiDMvrEKrrFVEftDmQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\DELL\\source\\repos\\WebApplication2\\School_Login_SignUp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\DELL\\.nuget\\packages\\bouncycastle.cryptography\\2.2.1\\bouncycastle.cryptography.2.2.1.nupkg.sha512",
+    "C:\\Users\\DELL\\.nuget\\packages\\dapper\\2.1.21\\dapper.2.1.21.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\mailkit\\4.2.0\\mailkit.4.2.0.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\microsoft.aspnetcore.openapi\\7.0.11\\microsoft.aspnetcore.openapi.7.0.11.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

@@ -44,3 +44,4 @@ C:\Users\DELL\source\repos\WebApplication2\obj\Debug\net7.0\School_Login_SignUp.
 C:\Users\DELL\source\repos\WebApplication2\obj\Debug\net7.0\ref\School_Login_SignUp.dll
 C:\Users\DELL\source\repos\WebApplication2\bin\Debug\net7.0\Newtonsoft.Json.dll
 C:\Users\DELL\source\repos\WebApplication2\bin\Debug\net7.0\RazorPay Core.dll
+C:\Users\DELL\source\repos\WebApplication2\bin\Debug\net7.0\Dapper.dll

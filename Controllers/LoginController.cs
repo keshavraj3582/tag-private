@@ -27,11 +27,13 @@ namespace School_Login_SignUp.Controller
             {
                 using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    using (SqlCommand command = new SqlCommand("GetRoleByUserNameAndPassword", connection))
+                    using (SqlCommand command = new SqlCommand("select Role from SuperAdmin_Dashboard where Email = @Email and Password = @Password", connection))
+
                     {
-                        command.CommandType = CommandType.StoredProcedure;
+                        // command.CommandType = CommandType;
                         command.Parameters.Add(new SqlParameter("@Email", SqlDbType.VarChar) { Value = request.Email });
                         command.Parameters.Add(new SqlParameter("@Password", SqlDbType.VarChar) { Value = request.Password });
+                        //command.Parameters.Add(new SqlParameter("@Role", SqlDbType.VarChar) { Value = request.Password })
 
                         connection.Open();
                         string role = (string)command.ExecuteScalar();

@@ -46,7 +46,7 @@ namespace School_Login_SignUp.Controllers
                 } 
                 else if (selectedModulesAmount >= 0)
                 {
-                    return NotFound("No data found for schools with verification status = 1.");
+                    return NotFound("No data found for schools with verification status = 1."); 
                 }
                 else
                 {

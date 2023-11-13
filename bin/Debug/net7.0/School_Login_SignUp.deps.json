@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v7.0": {
       "School_Login_SignUp/1.0.0": {
         "dependencies": {
+          "Dapper": "2.1.21",
           "MailKit": "4.2.0",
           "Microsoft.AspNetCore.OpenApi": "7.0.11",
           "MimeKit": "4.2.0",
@@ -24,6 +25,14 @@
           "lib/net6.0/BouncyCastle.Cryptography.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.2.1.47552"
+          }
+        }
+      },
+      "Dapper/2.1.21": {
+        "runtime": {
+          "lib/net7.0/Dapper.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.1.21.38011"
           }
         }
       },
@@ -240,6 +249,13 @@
       "sha512": "sha512-A6Zr52zVqJKt18ZBsTnX0qhG0kwIQftVAjLmszmkiR/trSp8H+xj1gUOzk7XHwaKgyREMSV1v9XaKrBUeIOdvQ==",
       "path": "bouncycastle.cryptography/2.2.1",
       "hashPath": "bouncycastle.cryptography.2.2.1.nupkg.sha512"
+    },
+    "Dapper/2.1.21": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EaTXNZX60/k9snRsLxFhD2XmoSKubc+VOeL3hBM6/R8j2MT8/81xOc2V8EEhwr8Mu3Sf951PJPxjlXN4FznH0w==",
+      "path": "dapper/2.1.21",
+      "hashPath": "dapper.2.1.21.nupkg.sha512"
     },
     "MailKit/4.2.0": {
       "type": "package",
